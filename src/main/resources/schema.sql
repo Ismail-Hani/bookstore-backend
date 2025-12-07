@@ -1,0 +1,289 @@
+-- Users
+CREATE TABLE users (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email           VARCHAR(320) NOT NULL UNIQUE,
+    password_hash   VARCHAR(100) NOT NULL,
+    full_name       VARCHAR(120) NOT NULL,
+    phone           VARCHAR(32),
+    status          VARCHAR(20) NOT NULL DEFAULT 'active', -- active / blocked
+    created_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at      DATETIME(6) NULL
+);
+
+-- Refresh tokens
+CREATE TABLE refresh_tokens (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT NOT NULL,
+    token       VARCHAR(255) NOT NULL UNIQUE,
+    expires_at  DATETIME(6) NOT NULL,
+    revoked_at  DATETIME(6) NULL,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_refresh_tokens_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Books
+CREATE TABLE books (
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title            VARCHAR(300) NOT NULL,
+    subtitle         VARCHAR(300),
+    isbn13           VARCHAR(13) UNIQUE,
+    isbn10           VARCHAR(10),
+    description      TEXT,
+    price_cents      INT NOT NULL,
+    currency         VARCHAR(3) NOT NULL DEFAULT 'KRW',
+    stock            INT NOT NULL DEFAULT 0,
+    published_at     DATE,
+    language_code    VARCHAR(8),
+    publisher        VARCHAR(200),
+    page_count       INT,
+    format           VARCHAR(32) NOT NULL DEFAULT 'paperback',
+    cover_image_url  TEXT,
+    status           VARCHAR(32) NOT NULL DEFAULT 'active',
+    created_at       DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at       DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at       DATETIME(6) NULL
+);
+
+-- Authors
+CREATE TABLE authors (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(200) NOT NULL,
+    bio         TEXT,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+);
+
+-- Book ↔ Authors (N-N)
+CREATE TABLE book_authors (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    book_id     BIGINT NOT NULL,
+    author_id   BIGINT NOT NULL,
+    position    INT NOT NULL DEFAULT 1,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_book_authors_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_book_authors_author
+        FOREIGN KEY (author_id) REFERENCES authors(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_book_authors UNIQUE (book_id, author_id)
+);
+
+-- Categories
+CREATE TABLE categories (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(150) NOT NULL,
+    slug        VARCHAR(160) NOT NULL UNIQUE,
+    parent_id   BIGINT NULL,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_categories_parent
+        FOREIGN KEY (parent_id) REFERENCES categories(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- Book ↔ Categories (N-N)
+CREATE TABLE book_categories (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    book_id     BIGINT NOT NULL,
+    category_id BIGINT NOT NULL,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_book_categories_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_book_categories_category
+        FOREIGN KEY (category_id) REFERENCES categories(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_book_categories UNIQUE (book_id, category_id)
+);
+
+-- Reviews
+CREATE TABLE reviews (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    book_id         BIGINT NOT NULL,
+    rating          SMALLINT NOT NULL,
+    title           VARCHAR(200),
+    content         TEXT NOT NULL,
+    like_count      INT NOT NULL DEFAULT 0,
+    comment_count   INT NOT NULL DEFAULT 0,
+    created_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at      DATETIME(6) NULL,
+    CONSTRAINT fk_reviews_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_reviews_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_reviews_user_book UNIQUE (user_id, book_id)
+);
+
+-- Review likes
+CREATE TABLE review_likes (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT NOT NULL,
+    review_id   BIGINT NOT NULL,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_review_likes_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_review_likes_review
+        FOREIGN KEY (review_id) REFERENCES reviews(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_review_likes UNIQUE (user_id, review_id)
+);
+
+-- Comments
+CREATE TABLE comments (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    review_id   BIGINT NOT NULL,
+    user_id     BIGINT NOT NULL,
+    content     TEXT NOT NULL,
+    like_count  INT NOT NULL DEFAULT 0,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at  DATETIME(6) NULL,
+    CONSTRAINT fk_comments_review
+        FOREIGN KEY (review_id) REFERENCES reviews(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comments_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Comment likes
+CREATE TABLE comment_likes (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT NOT NULL,
+    comment_id  BIGINT NOT NULL,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_comment_likes_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_likes_comment
+        FOREIGN KEY (comment_id) REFERENCES comments(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_comment_likes UNIQUE (user_id, comment_id)
+);
+
+-- Wishlists
+CREATE TABLE wishlists (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT NOT NULL,
+    book_id     BIGINT NOT NULL,
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_wishlists_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_wishlists_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_wishlists UNIQUE (user_id, book_id)
+);
+
+-- Libraries (owned books)
+CREATE TABLE libraries (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    book_id         BIGINT NOT NULL,
+    acquired_at     DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    source_order_id BIGINT NULL,
+    CONSTRAINT fk_libraries_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_libraries_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_libraries_order
+        FOREIGN KEY (source_order_id) REFERENCES orders(id),
+    CONSTRAINT uq_libraries UNIQUE (user_id, book_id)
+);
+
+-- Carts
+CREATE TABLE carts (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT NOT NULL,
+    status      VARCHAR(20) NOT NULL DEFAULT 'active',
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_carts_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_carts_user_status ON carts(user_id, status);
+
+-- Cart items
+CREATE TABLE cart_items (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cart_id         BIGINT NOT NULL,
+    book_id         BIGINT NOT NULL,
+    quantity        INT NOT NULL DEFAULT 1,
+    unit_price_cents INT NOT NULL,
+    currency        VARCHAR(3) NOT NULL DEFAULT 'KRW',
+    created_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_cart_items_cart
+        FOREIGN KEY (cart_id) REFERENCES carts(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_cart_items_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_cart_items UNIQUE (cart_id, book_id)
+);
+
+-- Orders
+CREATE TABLE orders (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    order_number    VARCHAR(40) NOT NULL UNIQUE,
+    status          VARCHAR(20) NOT NULL DEFAULT 'pending',
+    subtotal_cents  INT NOT NULL DEFAULT 0,
+    shipping_cents  INT NOT NULL DEFAULT 0,
+    tax_cents       INT NOT NULL DEFAULT 0,
+    discount_cents  INT NOT NULL DEFAULT 0,
+    total_cents     INT NOT NULL,
+    currency        VARCHAR(3) NOT NULL DEFAULT 'KRW',
+    ship_recipient  VARCHAR(120),
+    ship_phone      VARCHAR(32),
+    ship_line1      VARCHAR(200),
+    ship_line2      VARCHAR(200),
+    ship_city       VARCHAR(120),
+    ship_state      VARCHAR(120),
+    ship_postal_code VARCHAR(20),
+    ship_country_code VARCHAR(2),
+    placed_at       DATETIME(6),
+    created_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at      DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_orders_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_orders_user_created_at ON orders(user_id, created_at);
+CREATE INDEX idx_orders_status_created_at ON orders(status, created_at);
+
+-- Order items
+CREATE TABLE order_items (
+    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id                BIGINT NOT NULL,
+    book_id                 BIGINT NOT NULL,
+    title_snapshot          VARCHAR(300) NOT NULL,
+    author_names_snapshot   TEXT,
+    unit_price_cents        INT NOT NULL,
+    quantity                INT NOT NULL DEFAULT 1,
+    total_cents             INT NOT NULL,
+    currency                VARCHAR(3) NOT NULL DEFAULT 'KRW',
+    CONSTRAINT fk_order_items_order
+        FOREIGN KEY (order_id) REFERENCES orders(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_order_items_book
+        FOREIGN KEY (book_id) REFERENCES books(id)
+        ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
