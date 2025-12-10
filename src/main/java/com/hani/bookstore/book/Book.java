@@ -55,7 +55,7 @@ public class Book {
     private Integer pageCount;
 
     @Column(nullable = false, length = 32)
-    private String format; // "paperback"...
+    private String format;
 
     @Lob
     @Column(name = "cover_image_url")

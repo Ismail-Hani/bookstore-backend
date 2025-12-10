@@ -1,10 +1,11 @@
 package com.hani.bookstore.user.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record UserResponseDTO(
         Long id,
         String email,
-        String role,
-        LocalDateTime createdAt
+        String fullName,
+        Instant createdAt,
+        Instant updatedAt
 ) {}

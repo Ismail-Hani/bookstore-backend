@@ -1,27 +1,48 @@
 package com.hani.bookstore.book.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 public record BookCreateDTO(
 
-        @NotBlank(message = "Title is required")
-        @Size(min = 1, max = 120, message = "Title must be between 1 and 120 characters")
+        @NotBlank
+        @Size(max = 300)
         String title,
 
-        @NotBlank(message = "Author is required")
-        @Size(min = 1, max = 80, message = "Author must be between 1 and 80 characters")
+        @Size(max = 300)
+        String subtitle,
+
+        @NotBlank
+        @Size(max = 80)
         String author,
 
-        @Size(max = 2000, message = "Description must not exceed 2000 characters")
+        @Size(max = 2000)
         String description,
 
-        @NotNull(message = "Price is required")
-        @Positive(message = "Price must be positive")
+        @NotNull
+        @Positive
         Double price,
 
-        LocalDate publishedDate
+        @NotBlank
+        String currency,
+
+        @NotNull
+        @PositiveOrZero
+        Integer stock,
+
+        LocalDate publishedAt,
+
+        String languageCode,
+
+        String publisher,
+
+        Integer pageCount,
+
+        @NotBlank
+        String format,
+
+        String coverImageUrl,
+
+        String isbn13,
+        String isbn10
 ) {}

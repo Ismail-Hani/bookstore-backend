@@ -7,10 +7,10 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class User {
 
     @Id
@@ -30,7 +30,7 @@ public class User {
     private String phone;
 
     @Column(nullable = false, length = 20)
-    private String status; // "active" / "blocked" (tu pourras mettre un enum Java)
+    private String status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

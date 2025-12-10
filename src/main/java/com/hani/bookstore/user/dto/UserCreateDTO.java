@@ -10,6 +10,9 @@ public record UserCreateDTO(
         @NotBlank(message = "Email is required")
         String email,
 
+        @NotBlank(message = "Full name is required")
+        String fullName,
+
         @NotBlank(message = "Password is required")
         @Size(min = 8, max = 64, message = "Password must be 8–64 characters")
         String password
