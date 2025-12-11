@@ -35,7 +35,8 @@ public class UserService {
 
         // Encode password
         user.setPasswordHash(encoder.encode(dto.password()));
-
+        user.setStatus("active");
+        user.setRole("ROLE_USER");
         userRepository.save(user);
 
         return mapper.toResponse(user);
