@@ -44,4 +44,25 @@ public class BookController {
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
+
+    @GetMapping("/page")
+    public BookListResponseDTO listPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sort
+    ) {
+        var result = service.getPaginated(page, size, sort);
+
+        return new BookListResponseDTO(
+                result.getContent(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                sort
+        );
+    }
+
+
+
 }

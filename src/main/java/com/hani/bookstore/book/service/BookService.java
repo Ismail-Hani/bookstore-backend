@@ -6,6 +6,10 @@ import com.hani.bookstore.book.mapper.BookMapper;
 import com.hani.bookstore.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 
 import java.util.List;
 
@@ -55,4 +59,14 @@ public class BookService {
         }
         repo.deleteById(id);
     }
+
+    public Page<BookResponseDTO> getPaginated(int page, int size, String sortBy) {
+
+        var pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
+
+        Page<Book> paged = repo.findAll(pageable);
+
+        return paged.map(mapper::toResponse);
+    }
+
 }

@@ -24,6 +24,9 @@ public class Book {
     @Column(length = 300)
     private String subtitle;
 
+    @Column(nullable = false, length = 200)
+    private String author;
+
     @Column(length = 13, unique = true)
     private String isbn13;
 
@@ -85,7 +88,5 @@ public class Book {
         this.updatedAt = Instant.now();
     }
 
-    @Column(nullable = false, length = 200)
-    private String author;
 
 }

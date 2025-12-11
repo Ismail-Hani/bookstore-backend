@@ -31,14 +31,27 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(auth -> auth
+
+                        // ----------------------
                         // PUBLIC ROUTES
+                        // ----------------------
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
 
-                        // ADMIN ROUTES (plus tard)
-                        //.requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // ----------------------
+                        // BOOKS
+                        // ----------------------
+                        .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
 
-                        // EVERYTHING ELSE = authenticated
+                        // ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // ----------------------
+                        // EVERYTHING ELSE
+                        // ----------------------
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
