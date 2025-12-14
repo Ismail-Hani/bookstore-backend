@@ -32,6 +32,19 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(auth -> auth
 
+
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
+
+                        // ----------------------
+                        // Health
+                        // ----------------------
+                        .requestMatchers("/health").permitAll()
+
                         // ----------------------
                         // PUBLIC ROUTES
                         // ----------------------
