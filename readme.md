@@ -57,4 +57,4 @@ You can:
 
 ---
 
-Project ready for submission.
+I didn’t have time to finish this project, so this is an incomplete but functional version.
