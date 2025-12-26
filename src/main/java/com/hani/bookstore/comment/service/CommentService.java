@@ -94,4 +94,25 @@ public class CommentService {
 
         commentRepo.delete(comment);
     }
+
+    public CommentResponseDTO getById(Long commentId) {
+        return commentRepo.findById(commentId)
+                .map(mapper::toResponse)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+    }
+
+    public List<CommentResponseDTO> listByUser(Long userId) {
+        return commentRepo.findByAuthor_Id(userId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    public List<CommentResponseDTO> getAll() {
+        return commentRepo.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
 }

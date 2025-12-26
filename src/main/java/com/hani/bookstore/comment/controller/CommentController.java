@@ -48,4 +48,28 @@ public class CommentController {
     ) {
         service.delete(commentId, userId);
     }
+
+    /**
+     * Get a single comment by id
+     */
+    @GetMapping("/{commentId}")
+    public CommentResponseDTO getById(@PathVariable Long commentId) {
+        return service.getById(commentId);
+    }
+
+    /**
+     * Get all comments by user
+     */
+    @GetMapping("/user/{userId}")
+    public List<CommentResponseDTO> listByUser(@PathVariable Long userId) {
+        return service.listByUser(userId);
+    }
+
+    /**
+     * Get all comments (admin / debug)
+     */
+    @GetMapping
+    public List<CommentResponseDTO> getAll() {
+        return service.getAll();
+    }
 }

@@ -51,4 +51,20 @@ public class ReviewController {
     ) {
         service.delete(reviewId, userId);
     }
+
+    /**
+     * Get all reviews
+     */
+    @GetMapping
+    public List<ReviewResponseDTO> getAll() {
+        return service.getAll();
+    }
+
+    /**
+     * Get all reviews written by a user
+     */
+    @GetMapping("/user/{userId}")
+    public List<ReviewResponseDTO> getByUser(@PathVariable Long userId) {
+        return service.getByUser(userId);
+    }
 }

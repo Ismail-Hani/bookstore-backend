@@ -63,6 +63,24 @@ public class BookController {
         );
     }
 
+    @GetMapping("/search")
+    public BookListResponseDTO search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String author,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,DESC") String sort
+    ) {
+        var result = service.search(keyword, author, page, size, sort);
 
+        return new BookListResponseDTO(
+                result.getContent(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                sort
+        );
+    }
 
 }

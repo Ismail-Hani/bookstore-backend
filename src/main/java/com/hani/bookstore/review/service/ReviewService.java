@@ -38,7 +38,6 @@ public class ReviewService {
         Book book = bookRepo.findById(dto.bookId())
                 .orElseThrow(() -> new RuntimeException("Book not found"));
 
-        // Rule: one review per user per book
         if (reviewRepo.existsByUser_IdAndBook_Id(userId, dto.bookId())) {
             throw new RuntimeException("You already reviewed this book");
         }
@@ -96,4 +95,19 @@ public class ReviewService {
 
         reviewRepo.delete(review);
     }
+
+    public List<ReviewResponseDTO> getAll() {
+        return reviewRepo.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    public List<ReviewResponseDTO> getByUser(Long userId) {
+        return reviewRepo.findByUser_Id(userId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
 }

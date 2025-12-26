@@ -69,4 +69,33 @@ public class BookService {
         return paged.map(mapper::toResponse);
     }
 
+    public Page<BookResponseDTO> search(
+            String keyword,
+            String author,
+            int page,
+            int size,
+            String sort
+    ) {
+        String[] sortParts = sort.split(",");
+        String sortField = sortParts[0];
+        Sort.Direction direction =
+                sortParts.length > 1 && sortParts[1].equalsIgnoreCase("ASC")
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC;
+
+        var pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        Page<Book> result;
+
+        if (keyword != null && !keyword.isBlank()) {
+            result = repo.findByTitleContainingIgnoreCase(keyword, pageable);
+        } else if (author != null && !author.isBlank()) {
+            result = repo.findByAuthorContainingIgnoreCase(author, pageable);
+        } else {
+            result = repo.findAll(pageable);
+        }
+
+        return result.map(mapper::toResponse);
+    }
+
 }
